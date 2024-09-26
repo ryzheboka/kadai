@@ -24,7 +24,7 @@ import io.kadai.common.internal.KadaiEngineImpl;
 import java.lang.reflect.Field;
 import org.apache.ibatis.session.SqlSession;
 
-/** Utility class to enable unit tests to access mappers directly. */
+/** Bla Utility class to enable unit tests to access mappers directly. */
 public class KadaiEngineProxy {
 
   private final InternalKadaiEngine engine;
