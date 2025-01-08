@@ -247,11 +247,12 @@ class LdapClientTest {
 
   @Test
   void testLdap_checkForMissingConfigurations() {
-    // optional config fields: minSearchForLength, maxNumberOfReturnedAccessIds, userPhoneAttribute,
-    // userMobilePhoneAttribute, userEmailAttribute, userOrglevel1Attribute, userOrglevel2Attribute,
-    // userOrglevel3Attribute, userOrglevel4Attribute, groupsOfUser, groupsOfUserName,
-    // groupOfUserType
-    assertThat(cut.checkForMissingConfigurations()).hasSize(LdapSettings.values().length - 15);
+    // 16 optional config fields: minSearchForLength, maxNumberOfReturnedAccessIds,
+    // userPhoneAttribute, userMobilePhoneAttribute, userEmailAttribute, userOrglevel1Attribute,
+    // userOrglevel2Attribute, userOrglevel3Attribute, userOrglevel4Attribute, groupsOfUser,
+    // groupsOfUserName, groupOfUserType, groupIdAttribute, permissionsOfUser,
+    // permissionsOfUserType, permissionsOfUserName
+    assertThat(cut.checkForMissingConfigurations()).hasSize(LdapSettings.values().length - 16);
   }
 
   @Test

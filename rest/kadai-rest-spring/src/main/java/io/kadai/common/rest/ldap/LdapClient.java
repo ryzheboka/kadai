@@ -346,7 +346,11 @@ public class LdapClient {
     andFilter.and(orFilter);
     final AndFilter andFilter2 = getPermissionsNotPresentAndFilter(andFilter);
 
-    String[] userAttributesToReturn = {getUserIdAttribute(), getGroupNameAttribute()};
+    String groupIdAttribute = (getGroupIdAttribute() != null && !getGroupIdAttribute().isEmpty())
+        ? getGroupIdAttribute() : getGroupNameAttribute();
+
+    String[] groupAttributesToReturn = {groupIdAttribute, getGroupNameAttribute()};
+
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(
           "Using filter '{}' for LDAP query with group search base {}.",
@@ -358,7 +362,7 @@ public class LdapClient {
         getGroupSearchBase(),
         andFilter2.encode(),
         SearchControls.SUBTREE_SCOPE,
-        userAttributesToReturn,
+        groupAttributesToReturn,
         new GroupContextMapper());
   }
 
@@ -500,7 +504,11 @@ public class LdapClient {
     final AndFilter andFilter = new AndFilter();
     andFilter.and(new EqualsFilter(getGroupSearchFilterName(), getGroupSearchFilterValue()));
     final OrFilter orFilter = new OrFilter();
-    orFilter.or(new EqualsFilter(getGroupNameAttribute(), accessId));
+    if (getGroupIdAttribute() != null && !getGroupIdAttribute().isEmpty()) {
+      orFilter.or(new EqualsFilter(getGroupIdAttribute(), accessId));
+    } else {
+      orFilter.or(new EqualsFilter(getGroupNameAttribute(), accessId));
+    }
     final AndFilter andFilter2 = new AndFilter();
     andFilter2.and(new NotPresentFilter(getUserPermissionsAttribute()));
     andFilter.and(orFilter);
@@ -509,10 +517,10 @@ public class LdapClient {
     LOGGER.debug(
         "Using filter '{}' for LDAP query with user search base {}.",
         andFilter2,
-        getPermissionSearchBase());
+        getGroupSearchBase());
 
     return ldapTemplate.search(
-        getPermissionSearchBase(),
+        getGroupSearchBase(),
         andFilter.encode(),
         SearchControls.SUBTREE_SCOPE,
         null,
@@ -653,6 +661,10 @@ public class LdapClient {
     return LdapSettings.KADAI_LDAP_GROUP_NAME_ATTRIBUTE.getValueFromEnv(env);
   }
 
+  public String getGroupIdAttribute() {
+    return LdapSettings.KADAI_LDAP_GROUP_ID_ATTRIBUTE.getValueFromEnv(env);
+  }
+
   public int calcMinSearchForLength(int defaultValue) {
     String envValue = LdapSettings.KADAI_LDAP_MIN_SEARCH_FOR_LENGTH.getValueFromEnv(env);
     if (envValue == null || envValue.isEmpty()) {
@@ -753,10 +765,12 @@ public class LdapClient {
   }
 
   String[] getLookUpGroupAttributesToReturn() {
+    String groupIdAttribute = (getGroupIdAttribute() != null && !getGroupIdAttribute().isEmpty())
+        ? getGroupIdAttribute() : getGroupNameAttribute();
     if (CN.equals(getGroupNameAttribute())) {
-      return new String[] {CN, getGroupSearchFilterName()};
+      return new String[] {groupIdAttribute, CN, getGroupSearchFilterName()};
     }
-    return new String[] {getGroupNameAttribute(), CN, getGroupSearchFilterName()};
+    return new String[] {groupIdAttribute, getGroupNameAttribute(), CN, getGroupSearchFilterName()};
   }
 
   String[] getLookUpPermissionAttributesToReturn() {
@@ -849,6 +863,7 @@ public class LdapClient {
         .filter(not(LdapSettings.KADAI_LDAP_PERMISSIONS_OF_USER::equals))
         .filter(not(LdapSettings.KADAI_LDAP_PERMISSIONS_OF_USER_NAME::equals))
         .filter(not(LdapSettings.KADAI_LDAP_PERMISSIONS_OF_USER_TYPE::equals))
+        .filter(not(LdapSettings.KADAI_LDAP_GROUP_ID_ATTRIBUTE::equals))
         .filter(p -> p.getValueFromEnv(env) == null)
         .toList();
   }
@@ -885,7 +900,13 @@ public class LdapClient {
   }
 
   private String getGroupIdFromContext(final DirContextOperations context) {
-    String groupId = context.getStringAttribute(getGroupNameAttribute());
+    String groupId;
+    if (getGroupIdAttribute() == null || getGroupIdAttribute().isEmpty()) {
+      groupId = context.getStringAttribute(getGroupNameAttribute());
+    } else {
+      groupId = context.getStringAttribute(getGroupIdAttribute());
+    }
+
     if (groupId != null && useLowerCaseForAccessIds) {
       return groupId.toLowerCase();
     } else {

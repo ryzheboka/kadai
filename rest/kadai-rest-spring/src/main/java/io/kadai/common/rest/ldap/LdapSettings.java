@@ -20,7 +20,9 @@ package io.kadai.common.rest.ldap;
 
 import org.springframework.core.env.Environment;
 
-/** Required settings to run ldap. */
+/**
+ * Required settings to run ldap.
+ */
 enum LdapSettings {
   KADAI_LDAP_USER_SEARCH_BASE("kadai.ldap.userSearchBase"),
   KADAI_LDAP_USER_SEARCH_FILTER_NAME("kadai.ldap.userSearchFilterName"),
@@ -47,6 +49,7 @@ enum LdapSettings {
   KADAI_LDAP_GROUP_SEARCH_FILTER_NAME("kadai.ldap.groupSearchFilterName"),
   KADAI_LDAP_GROUP_SEARCH_FILTER_VALUE("kadai.ldap.groupSearchFilterValue"),
   KADAI_LDAP_GROUP_NAME_ATTRIBUTE("kadai.ldap.groupNameAttribute"),
+  KADAI_LDAP_GROUP_ID_ATTRIBUTE("kadai.ldap.groupIdAttribute"),
   KADAI_LDAP_MIN_SEARCH_FOR_LENGTH("kadai.ldap.minSearchForLength"),
   KADAI_LDAP_MAX_NUMBER_OF_RETURNED_ACCESS_IDS("kadai.ldap.maxNumberOfReturnedAccessIds"),
   KADAI_LDAP_GROUPS_OF_USER("kadai.ldap.groupsOfUser"),
